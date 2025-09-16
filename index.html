@@ -17,7 +17,7 @@
             <div class="input-section">
                 <div class="input-group">
                     <label for="textInput">Enter your text:</label>
-                    <input type="text" id="textInput" placeholder="Type your message here..." value="hello">
+                    <textarea id="textInput" placeholder="Type your message here...&#10;Use Enter for new columns in Vitkovac V" rows="3">hello</textarea>
                 </div>
 
                 <div class="controls">
@@ -33,6 +33,8 @@
                             <option value="midis-h">Midis H - Horizontal</option>
                             <option value="midis-v">Midis V - Vertical</option>
                             <option value="ricetta">Ricetta - Stretched Lines</option>
+                            <option value="vitkovac-h">Vitkovac H - Horizontal</option>
+                            <option value="vitkovac-v">Vitkovac V - Vertical</option>
                         </select>
                     </div>
 
@@ -51,6 +53,54 @@
                     <div class="control-group">
                         <label for="colorPicker">Color:</label>
                         <input type="color" id="colorPicker" value="#000000">
+                    </div>
+
+                    <!-- Vitkovac-specific controls -->
+                    <div class="font-specific-section vitkovac-controls" id="vitkovacControls">
+                        <h4>Vitkovac Settings</h4>
+                        
+                        <div class="control-group">
+                            <label for="formSelect">Form:</label>
+                            <select id="formSelect">
+                                <option value="perm">PERM (taller arms)</option>
+                                <option value="tite" selected>TITE (shorter arms)</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="weightSelect">Weight:</label>
+                            <select id="weightSelect">
+                                <option value="thin">Thin</option>
+                                <option value="regular" selected>Regular</option>
+                                <option value="bold">Bold</option>
+                                <option value="heavy">Heavy</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="indexStyleSelect">Index:</label>
+                            <select id="indexStyleSelect">
+                                <option value="off" selected>Off</option>
+                                <option value="rectangle">Rectangle</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="colorExperimentToggle">
+                                <input type="checkbox" id="colorExperimentToggle">
+                                Color Experiment
+                            </label>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="mainLineColorPicker">Main Line Color:</label>
+                            <input type="color" id="mainLineColorPicker" value="#000000">
+                        </div>
+
+                        <div class="control-group">
+                            <label for="alterationColorPicker">Alteration Lines Color:</label>
+                            <input type="color" id="alterationColorPicker" value="#000000">
+                        </div>
                     </div>
                 </div>
             </div>
