@@ -1207,6 +1207,7 @@ class BiometricFontGenerator {
         this.updateSvgBackground(); // Apply background setting
         
         this.updateDecodingGuide(chars.map(c => c.toLowerCase()), 'ricetta', patterns);
+    }
 
     generateVitkovacH(text) {
         const patterns = this.getVitkovacHPatterns();
