@@ -327,6 +327,24 @@ footer strong {
 }
 
 /* Font-specific control visibility */
+.epetri-controls {
+    display: none;
+}
+
+.epetri-controls.show {
+    display: flex;
+    flex-direction: column;
+}
+
+.ricetta-controls {
+    display: none;
+}
+
+.ricetta-controls.show {
+    display: flex;
+    flex-direction: column;
+}
+
 .vitkovac-controls {
     display: none;
 }

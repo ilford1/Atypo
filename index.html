@@ -29,7 +29,7 @@
                             <option value="kvar-h-firstborn">Kvar H - FIRSTBORN</option>
                             <option value="kvar-v">Kvar V - Vertical</option>
                             <option value="kvar-sq">Kvar SQ - Square</option>
-                            <option value="epetri">Epetri - Waveform</option>
+                            <option value="epetri">Epetri - Readable Waveform</option>
                             <option value="midis-h">Midis H - Horizontal</option>
                             <option value="midis-v">Midis V - Vertical</option>
                             <option value="ricetta">Ricetta - Stretched Lines</option>
@@ -53,6 +53,69 @@
                     <div class="control-group">
                         <label for="colorPicker">Color:</label>
                         <input type="color" id="colorPicker" value="#000000">
+                    </div>
+
+                    <!-- Epetri-specific controls -->
+                    <div class="font-specific-section epetri-controls" id="epetriControls">
+                        <h4>Epetri Settings</h4>
+                        
+                        <div class="control-group">
+                            <label for="epetriWeightSelect">Weight:</label>
+                            <select id="epetriWeightSelect">
+                                <option value="anorexic-1" selected>Anorexic 1 (Ultra Thin)</option>
+                                <option value="anorexic-2">Anorexic 2 (Extra Thin)</option>
+                                <option value="anorexic-3">Anorexic 3 (Thin)</option>
+                                <option value="regular-1">Regular 1</option>
+                                <option value="regular-2">Regular 2</option>
+                                <option value="bold-1">Bold 1 (AIRY only)</option>
+                                <option value="bold-2">Bold 2 (AIRY only)</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="epetriFormSelect">Form:</label>
+                            <select id="epetriFormSelect">
+                                <option value="tite" selected>TITE (Compact)</option>
+                                <option value="airy">AIRY (Spaced)</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="epetriIndexToggle">
+                                <input type="checkbox" id="epetriIndexToggle">
+                                Show Index Lines
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Ricetta-specific controls -->
+                    <div class="font-specific-section ricetta-controls" id="ricettaControls">
+                        <h4>Ricetta Settings</h4>
+                        
+                        <div class="control-group">
+                            <label for="ricettaWeightSelect">Weight:</label>
+                            <select id="ricettaWeightSelect">
+                                <option value="normal" selected>Normal</option>
+                                <option value="semibold">Semibold</option>
+                                <option value="bold">Bold</option>
+                                <option value="pixel-crack">Pixel Crack</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="ricettaOrientationSelect">Orientation:</label>
+                            <select id="ricettaOrientationSelect">
+                                <option value="horizontal" selected>Horizontal Lines</option>
+                                <option value="vertical">Vertical Lines</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="ricettaSpacingToggle">
+                                <input type="checkbox" id="ricettaSpacingToggle" checked>
+                                Keep Character Spaces
+                            </label>
+                        </div>
                     </div>
 
                     <!-- Vitkovac-specific controls -->
