@@ -759,7 +759,7 @@ class BiometricFontGenerator {
         this.outputSvg.innerHTML = svgContent;
         this.updateSvgBackground(); // Apply background setting
 
-        this.updateDecodingGuide(chars, 'horizontal');
+        this.updateDecodingGuide(chars, 'horizontal', patterns);
     }
 
     generateKvarV(text) {
@@ -802,7 +802,7 @@ class BiometricFontGenerator {
         this.outputSvg.innerHTML = svgContent;
         this.updateSvgBackground(); // Apply background setting
 
-        this.updateDecodingGuide(chars, 'vertical');
+        this.updateDecodingGuide(chars, 'vertical', this.getVerticalPatterns());
     }
 
     generateKvarSQ(text) {
@@ -844,7 +844,7 @@ class BiometricFontGenerator {
         this.outputSvg.innerHTML = svgContent;
         this.updateSvgBackground(); // Apply background setting
 
-        this.updateDecodingGuide(chars, 'square');
+        this.updateDecodingGuide(chars, 'square', this.getSquarePatterns());
     }
 
     generateEpetri(text) {
@@ -1371,7 +1371,7 @@ class BiometricFontGenerator {
         this.outputSvg.innerHTML = svgContent;
         this.updateSvgBackground(); // Apply background setting
 
-        this.updateDecodingGuide(text.split(''), 'vitkovac-h');
+        this.updateDecodingGuide(text.split(''), 'vitkovac-h', this.getVitkovacHPatterns());
     }
 
     generateVitkovacV(text) {
@@ -1514,7 +1514,7 @@ class BiometricFontGenerator {
         this.outputSvg.innerHTML = svgContent;
         this.updateSvgBackground(); // Apply background setting
 
-        this.updateDecodingGuide(columns.join('').split(''), 'vitkovac-v');
+        this.updateDecodingGuide(columns.join('').split(''), 'vitkovac-v', this.getVitkovacVPatterns());
     }
 
     generateFont() {
@@ -1579,23 +1579,59 @@ class BiometricFontGenerator {
             let patternText = '';
             switch (type) {
                 case 'horizontal':
-                    patternText = 'Horizontal blocks';
+                    const kvarHPattern = patterns ? patterns[char.toLowerCase()] || patterns[char] : null;
+                    if (kvarHPattern) {
+                        const patternStr = kvarHPattern.map(row => 
+                            row.map(cell => cell ? '█' : '·').join('')
+                        ).join('/');
+                        const fontType = this.fontSelect.value.split('-').pop().toUpperCase();
+                        patternText = `KVAR-H ${fontType} | Pattern: ${patternStr}`;
+                    } else {
+                        patternText = 'Horizontal blocks';
+                    }
                     break;
                 case 'vertical':
-                    patternText = 'Vertical segments';
+                    const kvarVPattern = patterns ? patterns[char.toLowerCase()] || patterns[char] : null;
+                    if (kvarVPattern) {
+                        const patternStr = Array.isArray(kvarVPattern) ? 
+                            kvarVPattern.map(h => h === 1 ? '█' : '·').join('') : 
+                            (kvarVPattern === 1 ? '█' : '·');
+                        patternText = `KVAR-V | Pattern: ${patternStr}`;
+                    } else {
+                        patternText = 'Vertical segments';
+                    }
                     break;
                 case 'square':
-                    patternText = 'Square blocks';
+                    const kvarSqPattern = patterns ? patterns[char.toLowerCase()] || patterns[char] : null;
+                    if (kvarSqPattern) {
+                        const patternStr = kvarSqPattern.map(row => 
+                            row.map(cell => cell ? '█' : '·').join('')
+                        ).join('/');
+                        patternText = `KVAR-SQ | Pattern: ${patternStr}`;
+                    } else {
+                        patternText = 'Square blocks';
+                    }
                     break;
                 case 'epetri':
                     const epetriPattern = patterns ? patterns[char.toLowerCase()] || patterns[char] : null;
-                    if (epetriPattern) {
-                        const patternStr = epetriPattern.map(h => h === 0 ? '_' : h === 1 ? '▁' : h === 2 ? '▄' : '█').join('');
+                    if (epetriPattern && Array.isArray(epetriPattern)) {
+                        // Use proper Unicode block characters for height visualization
+                        const patternStr = epetriPattern.map(h => {
+                            switch(h) {
+                                case 0: return '·';  // · (middle dot for empty)
+                                case 1: return '▁';  // ▁ (lower block - 25%)
+                                case 2: return '▄';  // ▄ (half block - 60%)
+                                case 3: return '█';  // █ (full block - 100%)
+                                default: return '?';
+                            }
+                        }).join('');
                         const form = this.epetriFormSelect.value.toUpperCase();
                         const weight = this.epetriWeightSelect.value.replace('-', ' ').toUpperCase();
-                        patternText = `${form} ${weight} | Pattern: ${patternStr}`;
+                        patternText = `EPETRI ${form} ${weight} | Pattern: ${patternStr}`;
                     } else {
-                        patternText = 'Waveform bars';
+                        const form = this.epetriFormSelect.value.toUpperCase();
+                        const weight = this.epetriWeightSelect.value.replace('-', ' ').toUpperCase();
+                        patternText = `EPETRI ${form} ${weight} | Waveform bars`;
                     }
                     break;
                 case 'midis-h':
@@ -1633,13 +1669,36 @@ class BiometricFontGenerator {
                     }
                     break;
                 case 'vitkovac-h':
-                    const currentForm = this.formSelect.value.toUpperCase();
-                    const currentWeight = this.weightSelect.value;
-                    const currentIndex = this.indexStyleSelect.value;
-                    patternText = `${currentForm} ${currentWeight} | Index: ${currentIndex} | Supports: letters, numerals, alternates (A-Z)`;
+                    const vitkovacHPattern = patterns ? patterns[char.toLowerCase()] || patterns[char] : null;
+                    if (vitkovacHPattern) {
+                        const upStr = vitkovacHPattern.up.length > 0 ? '↑' + vitkovacHPattern.up.join(',') : '';
+                        const downStr = vitkovacHPattern.down.length > 0 ? '↓' + vitkovacHPattern.down.join(',') : '';
+                        const patternStr = [upStr, '—', downStr].filter(p => p).join(' ');
+                        const currentForm = this.formSelect.value.toUpperCase();
+                        const currentWeight = this.weightSelect.value.toUpperCase();
+                        const currentIndex = this.indexStyleSelect.value;
+                        patternText = `${currentForm} ${currentWeight} | Index: ${currentIndex} | Pattern: ${patternStr}`;
+                    } else {
+                        const currentForm = this.formSelect.value.toUpperCase();
+                        const currentWeight = this.weightSelect.value.toUpperCase();
+                        const currentIndex = this.indexStyleSelect.value;
+                        patternText = `${currentForm} ${currentWeight} | Index: ${currentIndex} | Main line with alteration lines`;
+                    }
                     break;
                 case 'vitkovac-v':
-                    patternText = 'Vertical columns | Supports: letters, numerals, alternates (A-Z) | Enter = new column';
+                    const vitkovacVPattern = patterns ? patterns[char.toLowerCase()] || patterns[char] : null;
+                    if (vitkovacVPattern) {
+                        const leftStr = vitkovacVPattern.left.length > 0 ? '←' + vitkovacVPattern.left.join(',') : '';
+                        const rightStr = vitkovacVPattern.right.length > 0 ? '→' + vitkovacVPattern.right.join(',') : '';
+                        const patternStr = [leftStr, '│', rightStr].filter(p => p).join(' ');
+                        const currentForm = this.formSelect.value.toUpperCase();
+                        const currentWeight = this.weightSelect.value.toUpperCase();
+                        patternText = `${currentForm} ${currentWeight} | Height: ${vitkovacVPattern.height} | Pattern: ${patternStr}`;
+                    } else {
+                        const currentForm = this.formSelect.value.toUpperCase();
+                        const currentWeight = this.weightSelect.value.toUpperCase();
+                        patternText = `${currentForm} ${currentWeight} | Vertical columns | Enter = new column`;
+                    }
                     break;
             }
             patternDiv.textContent = patternText;

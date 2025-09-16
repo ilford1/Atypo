@@ -1,0 +1,136 @@
+# WARP.md
+
+This file provides guidance to WARP (warp.dev) when working with code in this repository.
+
+## Project Overview
+
+The Atypography Generator is a biometric font generation web application that creates typographic designs based on the Atypography Manifesto. It generates non-traditional fonts that challenge conventional reading by creating "typography that hides in plain sight."
+
+## Architecture
+
+### Core Structure
+- **Single-page application** built with vanilla HTML/CSS/JavaScript
+- **Class-based architecture** with `BiometricFontGenerator` as the main controller
+- **Pattern-driven font generation** using mathematical arrays to define character shapes
+- **Real-time SVG rendering** with configurable export options
+
+### Font Systems
+The application implements multiple font families, each with distinct visual principles:
+
+1. **Kvar** - Grid-based patterns (H-BRUT, H-TITE, H-FIRSTBORN, V-Vertical, SQ-Square)
+2. **Epetri** - Readable waveform with vertical lines of varying heights
+3. **Midis** - Diagonal movement patterns (H-Horizontal, V-Vertical)  
+4. **Ricetta** - Extremely stretched horizontal/vertical lines
+5. **Vitkovac** - Main line with alteration lines (H-Horizontal, V-Vertical)
+
+### Key Components
+- **Pattern Systems**: Character definitions stored as mathematical arrays
+- **Rendering Engine**: SVG generation with scaling, coloring, and biometric mode
+- **Control System**: Font-specific UI controls that appear dynamically
+- **Export System**: SVG/PNG export with transparent background support
+
+## Development Commands
+
+### Local Development
+```bash
+# Serve locally (any HTTP server)
+python -m http.server 8000
+# or
+npx serve .
+# or
+php -S localhost:8000
+```
+
+### Testing
+```bash
+# Open in browser
+start index.html  # Windows
+open index.html   # macOS
+xdg-open index.html  # Linux
+```
+
+### Linting/Formatting
+No automated tools configured - manual code review recommended.
+
+## Font Implementation Patterns
+
+### Adding New Characters
+1. Define patterns in `get[FontName]Patterns()` methods
+2. Use consistent array format for the font type:
+   - **Grid fonts**: 2D arrays `[[1,0,1], [0,1,0]]`
+   - **Height-based**: 1D arrays with height values `[1,2,3,0]`
+   - **Coordinate-based**: Object with segments `{segments: [[0,0.8]], rows: 1}`
+
+### Font-Specific Controls
+Font-specific controls are managed through:
+- HTML sections with `font-specific-section` class
+- JavaScript `updateControlVisibility()` method
+- Event listeners in `setupEventListeners()` method
+
+## Key Files
+
+### Core Files
+- **`index.html`** - Main interface with all font controls and export options
+- **`script.js`** - Complete font generation logic (1700+ lines)
+- **`style.css`** - Responsive styling for all UI components
+
+### Documentation Files  
+- **`EPETRI_IMPROVEMENTS.md`** - Epetri font implementation details
+- **`MIDIS_IMPROVEMENTS.md`** - Midis H/V font specifications
+- **`RICETTA_IMPROVEMENTS.md`** - Ricetta stretched lines implementation
+- **`TRANSPARENT_EXPORT_FEATURE.md`** - Export system documentation
+- **`Atypography.pdf`, `Atypography2.pdf`, `Atypography3.pdf`** - Design specifications
+
+## Font Generation Process
+
+### Pattern-to-SVG Pipeline
+1. **Text input** → Character array
+2. **Pattern lookup** → Mathematical definitions
+3. **Scaling/positioning** → SVG coordinate calculation  
+4. **Rendering** → SVG element generation
+5. **Export** → File download with proper formatting
+
+### Biometric Mode
+- **Joined appearance**: Minimal spacing between characters
+- **Continuous flow**: Visual connections between elements
+- **Architectural integration**: Designed for contexts where traditional typography appears inappropriate
+
+## Development Guidelines
+
+### Code Organization
+- **Pattern definitions**: Keep mathematical arrays clean and well-commented
+- **Font generators**: Each font has its own `generate[FontName]()` method
+- **UI controls**: Font-specific controls should be properly toggled in `updateControlVisibility()`
+- **Export functions**: Maintain consistent filename patterns and format support
+
+### Performance Considerations
+- **Large pattern arrays**: Keep character definitions efficient
+- **SVG generation**: Optimize for smooth real-time updates
+- **Memory management**: Proper cleanup in PNG export functions
+
+### Visual Quality
+- **Scaling**: All fonts should work well at different scale values (0.5x - 3.0x)
+- **Color consistency**: Maintain proper color application across all elements
+- **Rounded corners**: Use subtle rounding (`rx` property) for better aesthetics
+
+## Deployment
+
+### Static Hosting
+The application is ready for static deployment to:
+- **Vercel** (`.vercel` folder indicates previous deployment)
+- **Netlify**  
+- **GitHub Pages**
+- **Any static host**
+
+### Build Process
+No build process required - direct deployment of HTML/CSS/JS files.
+
+## Font Usage Philosophy
+
+The fonts generated by this tool follow the **Atypography Manifesto** principles:
+- **Challenge conventional reading** patterns
+- **Integrate with architecture** and design where traditional fonts appear kitsch
+- **Provide biometric appearance** for seamless environmental integration
+- **Maintain readability** through pattern recognition rather than traditional letterforms
+
+Each font system implements different strategies for achieving these goals while preserving the ability to encode and decode textual information.
