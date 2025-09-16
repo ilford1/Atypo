@@ -16,6 +16,8 @@ class BiometricFontGenerator {
         this.decodingGuide = document.getElementById('decodingGuide');
         this.copyBtn = document.getElementById('copyBtn');
         this.downloadBtn = document.getElementById('downloadBtn');
+        this.downloadPngBtn = document.getElementById('downloadPngBtn');
+        this.transparentBgToggle = document.getElementById('transparentBgToggle');
         
         // Epetri-specific controls
         this.epetriWeightSelect = document.getElementById('epetriWeightSelect');
@@ -71,6 +73,8 @@ class BiometricFontGenerator {
         this.updateControlVisibility();
         this.copyBtn.addEventListener('click', () => this.copySvg());
         this.downloadBtn.addEventListener('click', () => this.downloadSvg());
+        this.downloadPngBtn.addEventListener('click', () => this.downloadPng());
+        this.transparentBgToggle.addEventListener('change', () => this.updateSvgBackground());
     }
 
     updateControlVisibility() {
@@ -753,6 +757,7 @@ class BiometricFontGenerator {
         const totalWidth = currentX - spacing;
         this.outputSvg.setAttribute('viewBox', `0 0 ${Math.max(totalWidth, 100)} ${maxHeight}`);
         this.outputSvg.innerHTML = svgContent;
+        this.updateSvgBackground(); // Apply background setting
 
         this.updateDecodingGuide(chars, 'horizontal');
     }
@@ -795,6 +800,7 @@ class BiometricFontGenerator {
         const maxHeight = 5 * lineHeight;
         this.outputSvg.setAttribute('viewBox', `0 0 ${Math.max(totalWidth, 100)} ${maxHeight}`);
         this.outputSvg.innerHTML = svgContent;
+        this.updateSvgBackground(); // Apply background setting
 
         this.updateDecodingGuide(chars, 'vertical');
     }
@@ -836,6 +842,7 @@ class BiometricFontGenerator {
         const totalWidth = currentX - spacing;
         this.outputSvg.setAttribute('viewBox', `0 0 ${Math.max(totalWidth, 100)} ${Math.max(maxHeight, 50)}`);
         this.outputSvg.innerHTML = svgContent;
+        this.updateSvgBackground(); // Apply background setting
 
         this.updateDecodingGuide(chars, 'square');
     }
@@ -921,6 +928,7 @@ class BiometricFontGenerator {
         const totalWidth = Math.max(currentX - spacing, 100);
         this.outputSvg.setAttribute('viewBox', `0 0 ${totalWidth} ${baseHeight}`);
         this.outputSvg.innerHTML = svgContent;
+        this.updateSvgBackground(); // Apply background setting
 
         this.updateDecodingGuide(chars.map(c => c.toLowerCase()), 'epetri', patterns);
     }
@@ -994,6 +1002,7 @@ class BiometricFontGenerator {
         const totalHeight = Math.max(maxHeight, 60);
         this.outputSvg.setAttribute('viewBox', `0 0 ${totalWidth} ${totalHeight}`);
         this.outputSvg.innerHTML = svgContent;
+        this.updateSvgBackground(); // Apply background setting
 
         this.updateDecodingGuide(chars.map(c => c.toLowerCase()), 'midis-h', patterns);
     }
@@ -1062,6 +1071,7 @@ class BiometricFontGenerator {
         const totalHeight = Math.max(maxHeight, baseHeight);
         this.outputSvg.setAttribute('viewBox', `0 0 ${totalWidth} ${totalHeight}`);
         this.outputSvg.innerHTML = svgContent;
+        this.updateSvgBackground(); // Apply background setting
 
         this.updateDecodingGuide(chars.map(c => c.toLowerCase()), 'midis-v', patterns);
     }
@@ -1192,10 +1202,11 @@ class BiometricFontGenerator {
             const totalHeight = Math.max(maxUsedDimension, maxDimension);
             this.outputSvg.setAttribute('viewBox', `0 0 ${totalWidth} ${totalHeight}`);
         }
+        
         this.outputSvg.innerHTML = svgContent;
-
+        this.updateSvgBackground(); // Apply background setting
+        
         this.updateDecodingGuide(chars.map(c => c.toLowerCase()), 'ricetta', patterns);
-    }
 
     generateVitkovacH(text) {
         const patterns = this.getVitkovacHPatterns();
@@ -1357,8 +1368,9 @@ class BiometricFontGenerator {
         const totalWidth = currentX;
         this.outputSvg.setAttribute('viewBox', `0 0 ${Math.max(totalWidth, 100)} ${totalHeight}`);
         this.outputSvg.innerHTML = svgContent;
+        this.updateSvgBackground(); // Apply background setting
 
-        this.updateDecodingGuide(chars, 'vitkovac-h');
+        this.updateDecodingGuide(text.split(''), 'vitkovac-h');
     }
 
     generateVitkovacV(text) {
@@ -1499,6 +1511,7 @@ class BiometricFontGenerator {
         const totalHeight = maxColumnHeight;
         this.outputSvg.setAttribute('viewBox', `0 0 ${totalWidth} ${totalHeight}`);
         this.outputSvg.innerHTML = svgContent;
+        this.updateSvgBackground(); // Apply background setting
 
         this.updateDecodingGuide(columns.join('').split(''), 'vitkovac-v');
     }
@@ -1637,7 +1650,21 @@ class BiometricFontGenerator {
     }
 
     copySvg() {
-        const svgString = new XMLSerializer().serializeToString(this.outputSvg);
+        const isTransparent = this.transparentBgToggle.checked;
+        const svgElement = this.outputSvg.cloneNode(true);
+        
+        // Add background if not transparent
+        if (!isTransparent) {
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', '0');
+            rect.setAttribute('y', '0');
+            rect.setAttribute('width', '100%');
+            rect.setAttribute('height', '100%');
+            rect.setAttribute('fill', 'white');
+            svgElement.insertBefore(rect, svgElement.firstChild);
+        }
+        
+        const svgString = new XMLSerializer().serializeToString(svgElement);
         navigator.clipboard.writeText(svgString).then(() => {
             this.showSuccessMessage('SVG copied to clipboard!');
         }).catch(err => {
@@ -1646,20 +1673,116 @@ class BiometricFontGenerator {
         });
     }
 
+    updateSvgBackground() {
+        const isTransparent = this.transparentBgToggle.checked;
+        const svgElement = this.outputSvg;
+        
+        if (isTransparent) {
+            // Remove any existing background
+            svgElement.style.background = 'transparent';
+            // Remove white background from container
+            svgElement.parentElement.style.background = 'transparent';
+        } else {
+            // Set white background
+            svgElement.style.background = 'white';
+            svgElement.parentElement.style.background = '#f8f9fa';
+        }
+    }
+
     downloadSvg() {
-        const svgString = new XMLSerializer().serializeToString(this.outputSvg);
+        const isTransparent = this.transparentBgToggle.checked;
+        const svgElement = this.outputSvg.cloneNode(true);
+        
+        // Add background if not transparent
+        if (!isTransparent) {
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', '0');
+            rect.setAttribute('y', '0');
+            rect.setAttribute('width', '100%');
+            rect.setAttribute('height', '100%');
+            rect.setAttribute('fill', 'white');
+            svgElement.insertBefore(rect, svgElement.firstChild);
+        }
+        
+        const svgString = new XMLSerializer().serializeToString(svgElement);
         const blob = new Blob([svgString], { type: 'image/svg+xml' });
         const url = URL.createObjectURL(blob);
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `atypography-${this.fontSelect.value}-${Date.now()}.svg`;
+        const bgSuffix = isTransparent ? '-transparent' : '';
+        a.download = `atypography-${this.fontSelect.value}${bgSuffix}-${Date.now()}.svg`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         
         this.showSuccessMessage('SVG downloaded!');
+    }
+
+    downloadPng() {
+        const isTransparent = this.transparentBgToggle.checked;
+        const svgElement = this.outputSvg.cloneNode(true);
+        
+        // Add background if not transparent
+        if (!isTransparent) {
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', '0');
+            rect.setAttribute('y', '0');
+            rect.setAttribute('width', '100%');
+            rect.setAttribute('height', '100%');
+            rect.setAttribute('fill', 'white');
+            svgElement.insertBefore(rect, svgElement.firstChild);
+        }
+        
+        const svgString = new XMLSerializer().serializeToString(svgElement);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        // Get SVG dimensions
+        const viewBox = svgElement.getAttribute('viewBox');
+        const [, , width, height] = viewBox ? viewBox.split(' ').map(Number) : [0, 0, 800, 200];
+        
+        // Set canvas size (high resolution for quality)
+        const scale = 2;
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+        ctx.scale(scale, scale);
+        
+        // Set transparent background if requested
+        if (!isTransparent) {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, width, height);
+        }
+        
+        img.onload = () => {
+            ctx.drawImage(img, 0, 0);
+            
+            // Convert to PNG and download
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const bgSuffix = isTransparent ? '-transparent' : '';
+                a.download = `atypography-${this.fontSelect.value}${bgSuffix}-${Date.now()}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.showSuccessMessage('PNG downloaded!');
+            }, 'image/png', 1.0);
+        };
+        
+        img.onerror = () => {
+            this.showSuccessMessage('PNG export failed. Please try SVG export instead.');
+        };
+        
+        // Convert SVG to data URL
+        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+        img.src = url;
     }
 
     showSuccessMessage(message) {

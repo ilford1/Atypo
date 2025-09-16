@@ -162,6 +162,31 @@ main {
     font-weight: 600;
 }
 
+.export-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.export-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.export-controls label {
+    font-size: 0.9rem;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.export-controls input[type="checkbox"] {
+    margin: 0;
+}
+
 .export-buttons {
     display: flex;
     gap: 1rem;
@@ -273,6 +298,10 @@ footer strong {
     .output-header {
         flex-direction: column;
         gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .export-options {
         align-items: stretch;
     }
     
