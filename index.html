@@ -45,10 +45,6 @@
                         </label>
                     </div>
 
-                    <div class="control-group">
-                        <label for="scaleSlider">Scale: <span id="scaleValue">1.0</span></label>
-                        <input type="range" id="scaleSlider" min="0.5" max="3.0" step="0.1" value="1.0">
-                    </div>
 
                     <div class="control-group">
                         <label for="colorPicker">Color:</label>
@@ -177,6 +173,14 @@
                                 <input type="checkbox" id="transparentBgToggle">
                                 Transparent Background
                             </label>
+                            
+                            <label for="exportSize">PNG Export Size:</label>
+                            <select id="exportSize">
+                                <option value="1">Small (1x)</option>
+                                <option value="2" selected>Medium (2x)</option>
+                                <option value="4">Large (4x)</option>
+                                <option value="8">Extra Large (8x)</option>
+                            </select>
                         </div>
                         <div class="export-buttons">
                             <button id="copyBtn">Copy SVG</button>

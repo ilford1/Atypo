@@ -75,11 +75,7 @@ Font-specific controls are managed through:
 - **`style.css`** - Responsive styling for all UI components
 
 ### Documentation Files  
-- **`EPETRI_IMPROVEMENTS.md`** - Epetri font implementation details
-- **`MIDIS_IMPROVEMENTS.md`** - Midis H/V font specifications
-- **`RICETTA_IMPROVEMENTS.md`** - Ricetta stretched lines implementation
-- **`TRANSPARENT_EXPORT_FEATURE.md`** - Export system documentation
-- **`Atypography.pdf`, `Atypography2.pdf`, `Atypography3.pdf`** - Design specifications
+- **`Atypography.pdf`, `Atypography2.pdf`, `Atypography3.pdf`, `Atypography4.pdf`** - Design specifications
 
 ## Font Generation Process
 

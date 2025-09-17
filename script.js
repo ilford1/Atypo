@@ -9,8 +9,7 @@ class BiometricFontGenerator {
         this.textInput = document.getElementById('textInput');
         this.fontSelect = document.getElementById('fontSelect');
         this.biometricToggle = document.getElementById('biometricToggle');
-        this.scaleSlider = document.getElementById('scaleSlider');
-        this.scaleValue = document.getElementById('scaleValue');
+        this.exportSize = document.getElementById('exportSize');
         this.colorPicker = document.getElementById('colorPicker');
         this.outputSvg = document.getElementById('outputSvg');
         this.decodingGuide = document.getElementById('decodingGuide');
@@ -45,10 +44,6 @@ class BiometricFontGenerator {
             this.generateFont();
         });
         this.biometricToggle.addEventListener('change', () => this.generateFont());
-        this.scaleSlider.addEventListener('input', () => {
-            this.scaleValue.textContent = this.scaleSlider.value;
-            this.generateFont();
-        });
         this.colorPicker.addEventListener('change', () => this.generateFont());
         
         // Epetri controls
@@ -725,10 +720,9 @@ class BiometricFontGenerator {
     generateKvarH(text, style = 'brut') {
         const patterns = this.getCharacterPatterns()[`kvar-h-${style}`] || this.getCharacterPatterns()['kvar-h-brut'];
         const chars = text.toLowerCase().split('');
-        const scale = parseFloat(this.scaleSlider.value);
         const color = this.colorPicker.value;
         const biometric = this.biometricToggle.checked;
-        const blockSize = 8 * scale;
+        const blockSize = 12; // Fixed optimal size
         const spacing = biometric ? 0 : blockSize * 0.2;
 
         let svgContent = '';
@@ -765,10 +759,9 @@ class BiometricFontGenerator {
     generateKvarV(text) {
         const patterns = this.getVerticalPatterns();
         const chars = text.toLowerCase().split('');
-        const scale = parseFloat(this.scaleSlider.value);
         const color = this.colorPicker.value;
         const biometric = this.biometricToggle.checked;
-        const blockSize = 8 * scale;
+        const blockSize = 12; // Fixed optimal size
         const spacing = biometric ? 0 : blockSize * 0.2;
 
         let svgContent = '';
@@ -808,10 +801,9 @@ class BiometricFontGenerator {
     generateKvarSQ(text) {
         const patterns = this.getSquarePatterns();
         const chars = text.toLowerCase().split('');
-        const scale = parseFloat(this.scaleSlider.value);
         const color = this.colorPicker.value;
         const biometric = this.biometricToggle.checked;
-        const blockSize = 12 * scale;
+        const blockSize = 15; // Fixed optimal size
         const spacing = biometric ? blockSize * 0.1 : blockSize * 0.3;
 
         let svgContent = '';
@@ -850,7 +842,6 @@ class BiometricFontGenerator {
     generateEpetri(text) {
         const patterns = this.getEpetriPatterns();
         const chars = text.split(''); // Keep original case for uppercase variants
-        const scale = parseFloat(this.scaleSlider.value);
         const color = this.colorPicker.value;
         const biometric = this.biometricToggle.checked;
         
@@ -872,8 +863,8 @@ class BiometricFontGenerator {
         
         // Form affects spacing and character width
         const formMultiplier = form === 'airy' ? 1.5 : 1.0;
-        const blockWidth = 3 * scale * formMultiplier;
-        const baseHeight = 40 * scale;
+        const blockWidth = 4 * formMultiplier; // Fixed optimal size
+        const baseHeight = 50; // Fixed optimal height
         const spacing = biometric ? blockWidth * 0.05 : blockWidth * 0.3;
 
         let svgContent = '';
@@ -936,10 +927,9 @@ class BiometricFontGenerator {
     generateMidisH(text) {
         const patterns = this.getMidisHPatterns();
         const chars = text.split(''); // Preserve case for uppercase variants
-        const scale = parseFloat(this.scaleSlider.value);
         const color = this.colorPicker.value;
         const biometric = this.biometricToggle.checked;
-        const blockSize = 10 * scale; // Slightly larger blocks for better visibility
+        const blockSize = 12; // Fixed optimal size
         const rectHeight = blockSize * 0.7; // Rectangle height (horizontal emphasis)
         const spacing = biometric ? blockSize * 0.05 : blockSize * 0.3;
 
@@ -1010,11 +1000,10 @@ class BiometricFontGenerator {
     generateMidisV(text) {
         const patterns = this.getMidisVPatterns();
         const chars = text.split(''); // Preserve case for uppercase variants
-        const scale = parseFloat(this.scaleSlider.value);
         const color = this.colorPicker.value;
         const biometric = this.biometricToggle.checked;
-        const blockWidth = 6 * scale; // Slightly wider for better visibility
-        const baseHeight = 35 * scale;
+        const blockWidth = 8; // Fixed optimal size
+        const baseHeight = 45; // Fixed optimal height
         const spacing = biometric ? blockWidth * 0.1 : blockWidth * 0.4;
 
         let svgContent = '';
@@ -1079,7 +1068,6 @@ class BiometricFontGenerator {
     generateRicetta(text) {
         const patterns = this.getRicettaPatterns();
         const chars = text.split(''); // Preserve case for uppercase variants
-        const scale = parseFloat(this.scaleSlider.value);
         const color = this.colorPicker.value;
         const biometric = this.biometricToggle.checked;
         
@@ -1097,8 +1085,8 @@ class BiometricFontGenerator {
         }[weight] || 1.0;
         
         // Ricetta-specific parameters for extremely stretched lines
-        const lineThickness = 6 * scale * weightMultiplier;
-        const maxDimension = 150 * scale; // Maximum dimension for stretching
+        const lineThickness = 8 * weightMultiplier; // Fixed optimal base size
+        const maxDimension = 200; // Fixed optimal dimension
         const elementSpacing = lineThickness * 1.8; // Spacing between elements
         const charSpacing = biometric ? elementSpacing * 0.5 : elementSpacing * (keepSpaces ? 2.5 : 0.3);
 
@@ -1212,7 +1200,6 @@ class BiometricFontGenerator {
     generateVitkovacH(text) {
         const patterns = this.getVitkovacHPatterns();
         const chars = text.toLowerCase().split('');
-        const scale = parseFloat(this.scaleSlider.value);
         const fontType = this.fontSelect.value;
         
         // Use separate colors for Vitkovac, regular color for others
@@ -1255,7 +1242,7 @@ class BiometricFontGenerator {
         };
         const formMultiplier = formMap[form];
         
-        const blockSize = 8 * scale;
+        const blockSize = 10; // Fixed optimal size
         const altLineHeight = blockSize * formMultiplier;
         const mainLineY = altLineHeight + blockSize;  // Main line positioned with room above/below
         const mainLineThickness = blockSize * strokeThickness;
@@ -1376,7 +1363,6 @@ class BiometricFontGenerator {
 
     generateVitkovacV(text) {
         const patterns = this.getVitkovacVPatterns();
-        const scale = parseFloat(this.scaleSlider.value);
         const fontType = this.fontSelect.value;
         
         // Use color system like Vitkovac H
@@ -1413,7 +1399,7 @@ class BiometricFontGenerator {
         };
         const formMultiplier = formMap[form];
         
-        const blockSize = 8 * scale;
+        const blockSize = 10; // Fixed optimal size
         const altLineWidth = blockSize * formMultiplier;
         const mainLineThickness = blockSize * strokeThickness;
         const altLineThickness = blockSize * strokeThickness;
@@ -1749,6 +1735,7 @@ class BiometricFontGenerator {
         }
     }
 
+
     downloadSvg() {
         const isTransparent = this.transparentBgToggle.checked;
         const svgElement = this.outputSvg.cloneNode(true);
@@ -1782,15 +1769,31 @@ class BiometricFontGenerator {
 
     downloadPng() {
         const isTransparent = this.transparentBgToggle.checked;
+        const exportScale = parseInt(this.exportSize.value);
         const svgElement = this.outputSvg.cloneNode(true);
+        
+        // Get original SVG dimensions
+        const viewBox = svgElement.getAttribute('viewBox');
+        const [, , originalWidth, originalHeight] = viewBox ? viewBox.split(' ').map(Number) : [0, 0, 800, 200];
+        
+        // Scale the SVG content by modifying the viewBox to show the same content at a larger size
+        const scaledWidth = originalWidth * exportScale;
+        const scaledHeight = originalHeight * exportScale;
+        
+        // Set explicit width and height attributes for proper rendering
+        svgElement.setAttribute('width', scaledWidth);
+        svgElement.setAttribute('height', scaledHeight);
+        
+        // Keep the same viewBox so content scales up proportionally
+        svgElement.setAttribute('viewBox', `0 0 ${originalWidth} ${originalHeight}`);
         
         // Add background if not transparent
         if (!isTransparent) {
             const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
             rect.setAttribute('x', '0');
             rect.setAttribute('y', '0');
-            rect.setAttribute('width', '100%');
-            rect.setAttribute('height', '100%');
+            rect.setAttribute('width', originalWidth);
+            rect.setAttribute('height', originalHeight);
             rect.setAttribute('fill', 'white');
             svgElement.insertBefore(rect, svgElement.firstChild);
         }
@@ -1800,24 +1803,19 @@ class BiometricFontGenerator {
         const ctx = canvas.getContext('2d');
         const img = new Image();
         
-        // Get SVG dimensions
-        const viewBox = svgElement.getAttribute('viewBox');
-        const [, , width, height] = viewBox ? viewBox.split(' ').map(Number) : [0, 0, 800, 200];
+        // Set canvas size to match the scaled SVG
+        canvas.width = scaledWidth;
+        canvas.height = scaledHeight;
         
-        // Set canvas size (high resolution for quality)
-        const scale = 2;
-        canvas.width = width * scale;
-        canvas.height = height * scale;
-        ctx.scale(scale, scale);
-        
-        // Set transparent background if requested
+        // No need to scale context - SVG is already scaled
         if (!isTransparent) {
             ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, width, height);
+            ctx.fillRect(0, 0, scaledWidth, scaledHeight);
         }
         
         img.onload = () => {
-            ctx.drawImage(img, 0, 0);
+            // Draw the scaled SVG directly onto the canvas
+            ctx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
             
             // Convert to PNG and download
             canvas.toBlob((blob) => {
@@ -1825,13 +1823,14 @@ class BiometricFontGenerator {
                 const a = document.createElement('a');
                 a.href = url;
                 const bgSuffix = isTransparent ? '-transparent' : '';
-                a.download = `atypography-${this.fontSelect.value}${bgSuffix}-${Date.now()}.png`;
+                const scaleSuffix = exportScale > 1 ? `-${exportScale}x` : '';
+                a.download = `atypography-${this.fontSelect.value}${bgSuffix}${scaleSuffix}-${Date.now()}.png`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
                 
-                this.showSuccessMessage('PNG downloaded!');
+                this.showSuccessMessage(`PNG downloaded at ${exportScale}x scale!`);
             }, 'image/png', 1.0);
         };
         
