@@ -30,6 +30,7 @@
                             <option value="ricetta">Ricetta - Stretched Lines</option>
                             <option value="vitkovac-h">Vitkovac H - Horizontal</option>
                             <option value="vitkovac-v">Vitkovac V - Vertical</option>
+                            <option value="visual-poetry">Visual Poetry - Spatial Composition</option>
                         </select>
                     </div>
 
@@ -156,6 +157,87 @@
                             <input type="color" id="alterationColorPicker" value="#000000">
                         </div>
                     </div>
+
+                    <!-- Visual Poetry-specific controls -->
+                    <div class="font-specific-section visual-poetry-controls" id="visualPoetryControls">
+                        <h4>Visual Poetry Settings</h4>
+                        
+                        <div class="control-group">
+                            <label for="poetryModeSelect">Composition Mode:</label>
+                            <select id="poetryModeSelect">
+                                <option value="scattered" selected>Scattered Words</option>
+                                <option value="layered">Layered Text</option>
+                                <option value="curved">Curved Arrangement</option>
+                                <option value="spiral">Spiral Pattern</option>
+                                <option value="concrete">Concrete Poem</option>
+                                <option value="template">Preset Template</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group" id="templateSelectGroup" style="display: none;">
+                            <label for="templateSelect">Poetry Template:</label>
+                            <select id="templateSelect">
+                                <option value="falling-words">Falling Words</option>
+                                <option value="heart-shape">Heart Shape</option>
+                                <option value="tree-growth">Tree Growth</option>
+                                <option value="wave-motion">Wave Motion</option>
+                                <option value="explosion">Explosion/Burst</option>
+                                <option value="river-flow">River Flow</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="poetryFontSelect">Base Font:</label>
+                            <select id="poetryFontSelect">
+                                <option value="epetri" selected>Epetri (Waveform)</option>
+                                <option value="kvar-h-brut">Kvar H - BRUT</option>
+                                <option value="kvar-h-tite">Kvar H - TITE</option>
+                                <option value="kvar-v">Kvar V - Vertical</option>
+                                <option value="kvar-sq">Kvar SQ - Square</option>
+                                <option value="midis-h">Midis H - Horizontal</option>
+                                <option value="midis-v">Midis V - Vertical</option>
+                                <option value="ricetta">Ricetta - Stretched Lines</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group poetry-control" data-modes="scattered,curved,spiral,template">
+                            <label for="spacingIntensity">Spacing Intensity:</label>
+                            <input type="range" id="spacingIntensity" min="1" max="10" value="5">
+                            <span id="spacingIntensityValue">5</span>
+                        </div>
+
+                        <div class="control-group poetry-control" data-modes="scattered">
+                            <label for="rotationVariance">Rotation Variance:</label>
+                            <input type="range" id="rotationVariance" min="0" max="45" value="15">
+                            <span id="rotationVarianceValue">15°</span>
+                        </div>
+
+                        <div class="control-group poetry-control" data-modes="scattered,layered,template">
+                            <label for="scaleVariance">Size Variance:</label>
+                            <input type="range" id="scaleVariance" min="0" max="200" value="50">
+                            <span id="scaleVarianceValue">50%</span>
+                        </div>
+
+                        <div class="control-group poetry-control" data-modes="layered">
+                            <label for="layerOpacity">Layer Opacity:</label>
+                            <input type="range" id="layerOpacity" min="10" max="100" value="80">
+                            <span id="layerOpacityValue">80%</span>
+                        </div>
+
+                        <div class="control-group poetry-control" data-modes="concrete">
+                            <label for="semanticSpacing">
+                                <input type="checkbox" id="semanticSpacing" checked>
+                                Semantic Spacing (pauses create gaps)
+                            </label>
+                        </div>
+
+                        <div class="control-group poetry-control" data-modes="scattered">
+                            <label for="wordBreaking">
+                                <input type="checkbox" id="wordBreaking">
+                                Allow Word Breaking
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -185,10 +267,16 @@
                     </div>
                 </div>
                 
-                <div class="output-container">
+                <div class="output-container" id="outputContainer">
                     <svg id="outputSvg" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
                         <!-- Generated content will appear here -->
                     </svg>
+                    <!-- Visual Poetry canvas overlay -->
+                    <div id="poetryCanvas" class="poetry-canvas" style="display: none;">
+                        <svg id="poetrySvg" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Visual poetry composition will appear here -->
+                        </svg>
+                    </div>
                 </div>
 
                 <div class="info-panel">

@@ -35,6 +35,22 @@ class BiometricFontGenerator {
         this.mainLineColorPicker = document.getElementById('mainLineColorPicker');
         this.alterationColorPicker = document.getElementById('alterationColorPicker');
         this.colorExperimentToggle = document.getElementById('colorExperimentToggle');
+        
+        // Visual Poetry-specific controls
+        this.poetryModeSelect = document.getElementById('poetryModeSelect');
+        this.templateSelect = document.getElementById('templateSelect');
+        this.templateSelectGroup = document.getElementById('templateSelectGroup');
+        this.poetryFontSelect = document.getElementById('poetryFontSelect');
+        this.spacingIntensity = document.getElementById('spacingIntensity');
+        this.rotationVariance = document.getElementById('rotationVariance');
+        this.scaleVariance = document.getElementById('scaleVariance');
+        this.layerOpacity = document.getElementById('layerOpacity');
+        this.semanticSpacing = document.getElementById('semanticSpacing');
+        this.wordBreaking = document.getElementById('wordBreaking');
+        
+        // Visual Poetry canvas elements
+        this.poetryCanvas = document.getElementById('poetryCanvas');
+        this.poetrySvg = document.getElementById('poetrySvg');
     }
 
     setupEventListeners() {
@@ -64,6 +80,32 @@ class BiometricFontGenerator {
         this.alterationColorPicker.addEventListener('change', () => this.generateFont());
         this.colorExperimentToggle.addEventListener('change', () => this.generateFont());
         
+        // Visual Poetry controls
+        this.poetryModeSelect.addEventListener('change', () => {
+            this.updateTemplateVisibility();
+            this.generateFont();
+        });
+        this.templateSelect.addEventListener('change', () => this.generateFont());
+        this.poetryFontSelect.addEventListener('change', () => this.generateFont());
+        this.spacingIntensity.addEventListener('input', () => {
+            document.getElementById('spacingIntensityValue').textContent = this.spacingIntensity.value;
+            this.generateFont();
+        });
+        this.rotationVariance.addEventListener('input', () => {
+            document.getElementById('rotationVarianceValue').textContent = this.rotationVariance.value + '°';
+            this.generateFont();
+        });
+        this.scaleVariance.addEventListener('input', () => {
+            document.getElementById('scaleVarianceValue').textContent = this.scaleVariance.value + '%';
+            this.generateFont();
+        });
+        this.layerOpacity.addEventListener('input', () => {
+            document.getElementById('layerOpacityValue').textContent = this.layerOpacity.value + '%';
+            this.generateFont();
+        });
+        this.semanticSpacing.addEventListener('change', () => this.generateFont());
+        this.wordBreaking.addEventListener('change', () => this.generateFont());
+        
         // Initialize control visibility
         this.updateControlVisibility();
         this.copyBtn.addEventListener('click', () => this.copySvg());
@@ -77,6 +119,7 @@ class BiometricFontGenerator {
         const epetriControls = document.getElementById('epetriControls');
         const ricettaControls = document.getElementById('ricettaControls');
         const vitkovacControls = document.getElementById('vitkovacControls');
+        const visualPoetryControls = document.getElementById('visualPoetryControls');
         
         // Show/hide Epetri controls
         if (selectedFont === 'epetri') {
@@ -98,6 +141,52 @@ class BiometricFontGenerator {
         } else {
             vitkovacControls.classList.remove('show');
         }
+        
+        // Show/hide Visual Poetry controls and switch canvas
+        if (selectedFont === 'visual-poetry') {
+            visualPoetryControls.classList.add('show');
+            // Show poetry canvas, hide regular output
+            this.outputSvg.style.display = 'none';
+            this.poetryCanvas.style.display = 'block';
+            this.updateTemplateVisibility();
+        } else {
+            visualPoetryControls.classList.remove('show');
+            // Show regular output, hide poetry canvas
+            this.outputSvg.style.display = 'block';
+            this.poetryCanvas.style.display = 'none';
+            // Hide all poetry controls when not in visual poetry mode
+            const poetryControls = document.querySelectorAll('.poetry-control');
+            poetryControls.forEach(control => control.classList.remove('active'));
+        }
+    }
+
+    updateTemplateVisibility() {
+        if (this.poetryModeSelect && this.templateSelectGroup) {
+            const showTemplates = this.poetryModeSelect.value === 'template';
+            this.templateSelectGroup.style.display = showTemplates ? 'flex' : 'none';
+        }
+        
+        // Update poetry control visibility based on selected mode
+        this.updatePoetryControlVisibility();
+    }
+
+    updatePoetryControlVisibility() {
+        if (!this.poetryModeSelect) return;
+        
+        const selectedMode = this.poetryModeSelect.value;
+        const poetryControls = document.querySelectorAll('.poetry-control');
+        
+        poetryControls.forEach(control => {
+            const supportedModes = control.getAttribute('data-modes');
+            if (supportedModes) {
+                const modes = supportedModes.split(',');
+                if (modes.includes(selectedMode)) {
+                    control.classList.add('active');
+                } else {
+                    control.classList.remove('active');
+                }
+            }
+        });
     }
 
     // Character patterns based on the Atypography document
@@ -1503,6 +1592,1036 @@ class BiometricFontGenerator {
         this.updateDecodingGuide(columns.join('').split(''), 'vitkovac-v', this.getVitkovacVPatterns());
     }
 
+    generateVisualPoetry(text) {
+        const mode = this.poetryModeSelect.value;
+        const spacingIntensity = parseInt(this.spacingIntensity.value);
+        const rotationVariance = parseInt(this.rotationVariance.value);
+        const scaleVariance = parseInt(this.scaleVariance.value);
+        const layerOpacity = parseInt(this.layerOpacity.value) / 100;
+        const semanticSpacing = this.semanticSpacing.checked;
+        const wordBreaking = this.wordBreaking.checked;
+        const color = this.colorPicker.value;
+        const biometric = this.biometricToggle.checked;
+        
+        // Fixed canvas dimensions for consistent layout
+        const canvasWidth = 1200;
+        const canvasHeight = 800;
+        
+        let svgContent = '';
+        
+        // Parse text into lines for multi-line poetry
+        const lines = text.split('\n').filter(line => line.trim().length > 0);
+        if (lines.length === 0) lines.push('visual poetry');
+        
+        switch (mode) {
+            case 'scattered':
+                svgContent = this.generateScatteredComposition(lines, {
+                    canvasWidth, canvasHeight, spacingIntensity, rotationVariance, 
+                    scaleVariance, color, biometric, wordBreaking
+                });
+                break;
+            case 'layered':
+                svgContent = this.generateLayeredComposition(lines, {
+                    canvasWidth, canvasHeight, layerOpacity, scaleVariance, 
+                    color, biometric
+                });
+                break;
+            case 'curved':
+                svgContent = this.generateCurvedComposition(lines, {
+                    canvasWidth, canvasHeight, spacingIntensity, color, biometric
+                });
+                break;
+            case 'spiral':
+                svgContent = this.generateSpiralComposition(lines, {
+                    canvasWidth, canvasHeight, spacingIntensity, color, biometric
+                });
+                break;
+            case 'concrete':
+                svgContent = this.generateConcreteComposition(lines, {
+                    canvasWidth, canvasHeight, semanticSpacing, color, biometric
+                });
+                break;
+            case 'template':
+                const templateType = this.templateSelect.value;
+                svgContent = this.generateTemplateComposition(lines, templateType, {
+                    canvasWidth, canvasHeight, color, biometric, spacingIntensity, scaleVariance
+                });
+                break;
+            default:
+                svgContent = this.generateScatteredComposition(lines, {
+                    canvasWidth, canvasHeight, spacingIntensity, rotationVariance, 
+                    scaleVariance, color, biometric, wordBreaking
+                });
+        }
+        
+        // Set up SVG with consistent sizing
+        this.setupPoetryCanvas(svgContent, canvasWidth, canvasHeight);
+        
+        // Update decoding guide for visual poetry
+        this.updateDecodingGuide(text.split(/\s+/).filter(w => w.length > 0), 'visual-poetry', { mode, lines: lines.length });
+    }
+
+    setupPoetryCanvas(svgContent, canvasWidth, canvasHeight) {
+        // Add consistent margins to prevent clipping and ensure centering
+        const margin = 100; // 100px margin on all sides
+        const safeWidth = canvasWidth - (margin * 2);
+        const safeHeight = canvasHeight - (margin * 2);
+        
+        // Wrap content in a group with margin offset for safety
+        const centeredContent = `<g transform="translate(${margin}, ${margin})">${svgContent}</g>`;
+        
+        this.poetrySvg.setAttribute('viewBox', `0 0 ${canvasWidth} ${canvasHeight}`);
+        this.poetrySvg.setAttribute('width', canvasWidth);
+        this.poetrySvg.setAttribute('height', canvasHeight);
+        this.poetrySvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        this.poetrySvg.innerHTML = centeredContent;
+        this.updateSvgBackground(); // Apply background setting
+    }
+
+    generateScatteredComposition(lines, options) {
+        const { canvasWidth, canvasHeight, spacingIntensity, rotationVariance, scaleVariance, color, biometric, wordBreaking } = options;
+        let svgContent = '';
+        
+        // Use seeded random for consistent results
+        const seedRandom = this.createSeededRandom(lines.join('').length);
+        
+        // Use safe area within the canvas (excluding margins that will be added)
+        const safeMargin = 100; // This matches the margin in setupPoetryCanvas
+        const safeWidth = canvasWidth - (safeMargin * 2);
+        const safeHeight = canvasHeight - (safeMargin * 2);
+        
+        const baseSize = 24;
+        const minScale = 0.8;
+        const maxScale = 1 + (scaleVariance / 100);
+        
+        lines.forEach((line, lineIndex) => {
+            const words = wordBreaking ? line.split('') : line.split(/\s+/);
+            
+            words.forEach((word, wordIndex) => {
+                if (!word.trim()) return;
+                
+                // Random positioning within safe area
+                const innerMargin = safeWidth * 0.05; // Small inner margin
+                const effectiveWidth = safeWidth - (innerMargin * 2);
+                const effectiveHeight = safeHeight - (innerMargin * 2);
+                
+                let x, y;
+                
+                if (biometric) {
+                    // Biometric mode: more organic, flowing placement
+                    const flowAngle = (lineIndex * Math.PI / 4) + (wordIndex * 0.3);
+                    const radius = (effectiveWidth / 4) + (seedRandom() * spacingIntensity * 20);
+                    x = innerMargin + (effectiveWidth / 2) + Math.cos(flowAngle) * radius;
+                    y = innerMargin + (effectiveHeight / 2) + Math.sin(flowAngle) * radius * 0.6;
+                } else {
+                    // Standard mode: more random placement influenced by spacing intensity
+                    x = innerMargin + (seedRandom() * effectiveWidth);
+                    y = innerMargin + (seedRandom() * effectiveHeight);
+                }
+                
+                // Ensure text stays within safe area
+                x = Math.max(innerMargin, Math.min(x, safeWidth - innerMargin));
+                y = Math.max(innerMargin, Math.min(y, safeHeight - innerMargin));
+                
+                // Random rotation
+                const rotation = (seedRandom() - 0.5) * 2 * rotationVariance;
+                
+                // Random scale
+                const scale = minScale + (seedRandom() * (maxScale - minScale));
+                const fontSize = baseSize * scale;
+                
+                // Generate text using the selected base font
+                const wordSvg = this.generateWordWithBaseFont(word, color, fontSize);
+                
+                // Apply transforms
+                const transform = `translate(${x}, ${y}) rotate(${rotation}) scale(${scale})`;
+                
+                svgContent += `<g transform="${transform}">${wordSvg}</g>`;
+            });
+        });
+        
+        return svgContent;
+    }
+
+    generateWordWithBaseFont(word, color, fontSize) {
+        // Use the selected font for visual poetry
+        const selectedFont = this.poetryFontSelect ? this.poetryFontSelect.value : 'epetri';
+        const chars = word.split('');
+        
+        let svgContent = '';
+        let currentX = 0;
+        
+        switch (selectedFont) {
+            case 'epetri':
+                return this.generateEpetriWord(word, color, fontSize);
+            case 'kvar-h-brut':
+            case 'kvar-h-tite':
+                return this.generateKvarHWord(word, color, fontSize, selectedFont.split('-')[2]);
+            case 'kvar-v':
+                return this.generateKvarVWord(word, color, fontSize);
+            case 'kvar-sq':
+                return this.generateKvarSQWord(word, color, fontSize);
+            case 'midis-h':
+                return this.generateMidisHWord(word, color, fontSize);
+            case 'midis-v':
+                return this.generateMidisVWord(word, color, fontSize);
+            case 'ricetta':
+                return this.generateRicettaWord(word, color, fontSize);
+            default:
+                return this.generateEpetriWord(word, color, fontSize);
+        }
+    }
+
+    generateEpetriWord(word, color, fontSize) {
+        const patterns = this.getEpetriPatterns();
+        const chars = word.split('');
+        
+        let svgContent = '';
+        let currentX = 0;
+        const blockWidth = fontSize * 0.15;
+        const baseHeight = fontSize;
+        
+        chars.forEach((char) => {
+            const pattern = patterns[char.toLowerCase()] || patterns[char] || patterns[' '];
+            if (!Array.isArray(pattern)) return;
+            
+            pattern.forEach((segment, segIndex) => {
+                if (segment > 0) {
+                    const x = currentX + (segIndex * blockWidth);
+                    
+                    // Height mapping: 1=25%, 2=60%, 3=100%
+                    const heightRatio = segment === 1 ? 0.25 : segment === 2 ? 0.60 : 1.0;
+                    const height = baseHeight * heightRatio;
+                    const y = baseHeight - height;
+                    
+                    const lineWidth = blockWidth * 0.8;
+                    const lineX = x + (blockWidth - lineWidth) / 2;
+                    
+                    svgContent += `<rect x="${lineX}" y="${y}" width="${lineWidth}" height="${height}" fill="${color}"/>`;
+                }
+            });
+            
+            currentX += pattern.length * blockWidth + (blockWidth * 0.2);
+        });
+        
+        return svgContent;
+    }
+
+    generateKvarHWord(word, color, fontSize, style = 'brut') {
+        const patterns = this.getCharacterPatterns()[`kvar-h-${style}`] || this.getCharacterPatterns()['kvar-h-brut'];
+        const chars = word.toLowerCase().split('');
+        
+        let svgContent = '';
+        let currentX = 0;
+        const blockSize = fontSize * 0.6;
+        
+        chars.forEach((char) => {
+            const pattern = patterns[char] || patterns[' '];
+            if (!pattern) return;
+            
+            pattern.forEach((row, rowIndex) => {
+                row.forEach((cell, colIndex) => {
+                    if (cell === 1) {
+                        const x = currentX + (colIndex * blockSize);
+                        const y = rowIndex * blockSize;
+                        svgContent += `<rect x="${x}" y="${y}" width="${blockSize}" height="${blockSize}" fill="${color}"/>`;
+                    }
+                });
+            });
+            
+            currentX += (pattern[0].length * blockSize) + (blockSize * 0.2);
+        });
+        
+        return svgContent;
+    }
+
+    generateKvarVWord(word, color, fontSize) {
+        const patterns = this.getVerticalPatterns();
+        const chars = word.toLowerCase().split('');
+        
+        let svgContent = '';
+        let currentX = 0;
+        const blockSize = fontSize * 0.6;
+        const lineHeight = blockSize * 1.2;
+        
+        chars.forEach((char) => {
+            const pattern = patterns[char] || patterns[' '];
+            if (!pattern) return;
+            
+            if (Array.isArray(pattern)) {
+                pattern.forEach((segment, segIndex) => {
+                    if (segment === 1) {
+                        const y = segIndex * lineHeight;
+                        svgContent += `<rect x="${currentX}" y="${y}" width="${blockSize}" height="${lineHeight * 0.8}" fill="${color}"/>`;
+                    }
+                });
+            } else if (pattern === 1) {
+                svgContent += `<rect x="${currentX}" y="0" width="${blockSize}" height="${lineHeight * 0.8}" fill="${color}"/>`;
+            }
+            
+            currentX += blockSize + (blockSize * 0.2);
+        });
+        
+        return svgContent;
+    }
+
+    generateKvarSQWord(word, color, fontSize) {
+        const patterns = this.getSquarePatterns();
+        const chars = word.toLowerCase().split('');
+        
+        let svgContent = '';
+        let currentX = 0;
+        const blockSize = fontSize * 0.6;
+        
+        chars.forEach((char) => {
+            const pattern = patterns[char] || patterns[' '];
+            if (!pattern || !Array.isArray(pattern)) return;
+            
+            pattern.forEach((row, rowIndex) => {
+                row.forEach((cell, colIndex) => {
+                    if (cell === 1) {
+                        const x = currentX + (colIndex * blockSize);
+                        const y = rowIndex * blockSize;
+                        svgContent += `<rect x="${x}" y="${y}" width="${blockSize}" height="${blockSize}" fill="${color}"/>`;
+                    }
+                });
+            });
+            
+            currentX += (pattern[0].length * blockSize) + (blockSize * 0.2);
+        });
+        
+        return svgContent;
+    }
+
+    generateMidisHWord(word, color, fontSize) {
+        const patterns = this.getMidisHPatterns();
+        const chars = word.split('');
+        
+        let svgContent = '';
+        let currentX = 0;
+        const blockSize = fontSize * 0.5;
+        const rectHeight = blockSize * 0.7;
+        
+        chars.forEach((char) => {
+            const pattern = patterns[char.toLowerCase()] || patterns[char] || patterns[' '];
+            if (!Array.isArray(pattern)) return;
+            
+            pattern.forEach((row, rowIndex) => {
+                if (Array.isArray(row)) {
+                    row.forEach((cell, colIndex) => {
+                        if (cell === 1) {
+                            const x = currentX + (colIndex * blockSize);
+                            const y = rowIndex * blockSize + (blockSize - rectHeight) / 2;
+                            const roundness = rectHeight * 0.1;
+                            svgContent += `<rect x="${x}" y="${y}" width="${blockSize * 0.9}" height="${rectHeight}" fill="${color}" rx="${roundness}"/>`;
+                        }
+                    });
+                }
+            });
+            
+            const charWidth = Math.max(...pattern.map(row => Array.isArray(row) ? row.length : 0)) * blockSize;
+            currentX += charWidth + (blockSize * 0.2);
+        });
+        
+        return svgContent;
+    }
+
+    generateMidisVWord(word, color, fontSize) {
+        const patterns = this.getMidisVPatterns();
+        const chars = word.split('');
+        
+        let svgContent = '';
+        let currentX = 0;
+        const blockWidth = fontSize * 0.4;
+        const baseHeight = fontSize;
+        
+        chars.forEach((char) => {
+            const pattern = patterns[char.toLowerCase()] || patterns[char] || patterns[' '];
+            if (!Array.isArray(pattern)) return;
+            
+            pattern.forEach((segment, segIndex) => {
+                if (segment > 0) {
+                    const x = currentX;
+                    const heightRatio = segment === 1 ? 0.3 : segment === 2 ? 0.6 : 1.0;
+                    const segmentHeight = baseHeight * heightRatio;
+                    const y = baseHeight - segmentHeight;
+                    
+                    const rectWidth = blockWidth * 0.85;
+                    const rectX = x + (blockWidth - rectWidth) / 2;
+                    const roundness = rectWidth * 0.1;
+                    
+                    svgContent += `<rect x="${rectX}" y="${y}" width="${rectWidth}" height="${segmentHeight}" fill="${color}" rx="${roundness}"/>`;
+                }
+            });
+            
+            currentX += blockWidth + (blockWidth * 0.2);
+        });
+        
+        return svgContent;
+    }
+
+    generateRicettaWord(word, color, fontSize) {
+        const patterns = this.getRicettaPatterns();
+        const chars = word.split('');
+        
+        let svgContent = '';
+        let currentY = 0;
+        const lineThickness = fontSize * 0.1;
+        const maxDimension = fontSize * 8;
+        const elementSpacing = lineThickness * 1.5;
+        
+        chars.forEach((char) => {
+            const pattern = patterns[char.toLowerCase()] || patterns[char] || patterns[' '];
+            if (!pattern || !pattern.segments) return;
+            
+            const { segments, rows } = pattern;
+            
+            segments.forEach((segment, segIndex) => {
+                const [start, end] = segment;
+                const x = start * maxDimension;
+                const width = (end - start) * maxDimension;
+                const y = currentY + (segIndex * elementSpacing);
+                
+                const roundness = lineThickness * 0.2;
+                svgContent += `<rect x="${x}" y="${y}" width="${width}" height="${lineThickness}" fill="${color}" rx="${roundness}"/>`;
+            });
+            
+            currentY += (rows * elementSpacing) + elementSpacing;
+        });
+        
+        return svgContent;
+    }
+
+    createSeededRandom(seed) {
+        // Simple seeded random number generator for consistent results
+        let seedValue = seed;
+        return function() {
+            seedValue = (seedValue * 9301 + 49297) % 233280;
+            return seedValue / 233280;
+        };
+    }
+
+    generateLayeredComposition(lines, options) {
+        const { canvasWidth, canvasHeight, layerOpacity, scaleVariance, color, biometric } = options;
+        let svgContent = '';
+        
+        // Use safe area within the canvas (excluding margins)
+        const safeMargin = 100;
+        const safeWidth = canvasWidth - (safeMargin * 2);
+        const safeHeight = canvasHeight - (safeMargin * 2);
+        
+        const centerX = safeWidth / 2;
+        const centerY = safeHeight / 2;
+        const seedRandom = this.createSeededRandom(lines.join('').length);
+        
+        // Create depth layers with different effects
+        lines.forEach((line, lineIndex) => {
+            const words = line.split(/\s+/);
+            const layerDepth = lineIndex;
+            
+            // Layer-specific effects
+            const baseScale = 1 + (layerDepth * 0.15);
+            const layerOpacity_val = Math.max(layerOpacity - (layerDepth * 0.12), 0.15);
+            const blur = layerDepth * 0.3; // Depth blur effect
+            
+            words.forEach((word, wordIndex) => {
+                if (!word.trim()) return;
+                
+                // Position with slight randomness for organic layering
+                const offsetX = biometric ? 
+                    (seedRandom() - 0.5) * 100 * (layerDepth + 1) : 
+                    (seedRandom() - 0.5) * 80;
+                const offsetY = biometric ? 
+                    (seedRandom() - 0.5) * 60 * (layerDepth + 1) + (layerDepth * 25) : 
+                    layerDepth * 40 + (seedRandom() - 0.5) * 30;
+                
+                // Scale variation within layer
+                const scaleVariation = 1 + ((seedRandom() - 0.5) * (scaleVariance / 200));
+                const finalScale = baseScale * scaleVariation;
+                
+                // Generate word with depth-appropriate size
+                const fontSize = 28 + (layerDepth * 4);
+                const wordSvg = this.generateWordWithBaseFont(word, color, fontSize);
+                
+                // Create shadow/depth effect for back layers
+                let shadowEffect = '';
+                if (layerDepth > 0) {
+                    const shadowOffset = layerDepth * 2;
+                    const shadowOpacity = 0.2;
+                    const shadowColor = '#666666';
+                    
+                    shadowEffect = `
+                        <g transform="translate(${shadowOffset}, ${shadowOffset})" opacity="${shadowOpacity}">
+                            ${this.generateWordWithBaseFont(word, shadowColor, fontSize)}
+                        </g>
+                    `;
+                }
+                
+                // Apply transforms and effects
+                const transform = `translate(${centerX + offsetX}, ${centerY + offsetY}) scale(${finalScale})`;
+                const filter = blur > 0 ? `filter: blur(${blur}px);` : '';
+                
+                svgContent += `
+                    <g transform="${transform}" opacity="${layerOpacity_val}" style="${filter}">
+                        ${shadowEffect}
+                        ${wordSvg}
+                    </g>
+                `;
+            });
+        });
+        
+        return svgContent;
+    }
+
+    generateCurvedComposition(lines, options) {
+        const { canvasWidth, canvasHeight, spacingIntensity, color, biometric } = options;
+        let svgContent = '';
+        
+        const centerX = canvasWidth / 2;
+        const centerY = canvasHeight / 2;
+        const seedRandom = this.createSeededRandom(lines.join('').length);
+        
+        lines.forEach((line, lineIndex) => {
+            const words = line.split(/\s+/);
+            
+            if (biometric) {
+                // Biometric mode: create flowing, organic curves
+                svgContent += this.generateFlowingTextCurve(words, {
+                    centerX, centerY, lineIndex, color, seedRandom, canvasWidth, canvasHeight
+                });
+            } else {
+                // Standard mode: geometric curves with distortion effects
+                svgContent += this.generateGeometricCurve(words, {
+                    centerX, centerY, lineIndex, color, seedRandom, spacingIntensity
+                });
+            }
+        });
+        
+        return svgContent;
+    }
+
+    generateFlowingTextCurve(words, options) {
+        const { centerX, centerY, lineIndex, color, seedRandom, canvasWidth, canvasHeight } = options;
+        let svgContent = '';
+        
+        // Create a flowing path for the text
+        const pathPoints = [];
+        const numPoints = words.length + 3;
+        
+        for (let i = 0; i < numPoints; i++) {
+            const t = i / (numPoints - 1);
+            const angle = t * Math.PI * 2 + (lineIndex * Math.PI / 3);
+            const radiusVariation = 1 + (seedRandom() - 0.5) * 0.6;
+            const baseRadius = (canvasWidth * 0.2) + (lineIndex * 40);
+            const radius = baseRadius * radiusVariation;
+            
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius * 0.7; // Elliptical
+            
+            pathPoints.push({ x, y, angle });
+        }
+        
+        // Place words along the flowing curve
+        words.forEach((word, wordIndex) => {
+            if (!word.trim()) return;
+            
+            const t = (wordIndex + 1) / (words.length + 1);
+            const pointIndex = Math.floor(t * (pathPoints.length - 1));
+            const point = pathPoints[pointIndex];
+            
+            // Calculate rotation to follow curve
+            const nextPoint = pathPoints[Math.min(pointIndex + 1, pathPoints.length - 1)];
+            const curveAngle = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x);
+            const rotation = (curveAngle * 180 / Math.PI);
+            
+            // Add character-level distortions
+            const chars = word.split('');
+            let charX = 0;
+            
+            chars.forEach((char, charIndex) => {
+                // Progressive character distortion along the word
+                const charDistortion = (charIndex / chars.length) * 0.3;
+                const charScale = 1 + (seedRandom() - 0.5) * charDistortion;
+                const charRotation = rotation + (seedRandom() - 0.5) * 15 * charDistortion;
+                
+                const charSvg = this.generateWordWithBaseFont(char, color, 20);
+                const charTransform = `translate(${point.x + charX}, ${point.y}) rotate(${charRotation}) scale(${charScale})`;
+                
+                svgContent += `<g transform="${charTransform}">${charSvg}</g>`;
+                
+                charX += 15 * charScale; // Advance to next character position
+            });
+        });
+        
+        return svgContent;
+    }
+
+    generateGeometricCurve(words, options) {
+        const { centerX, centerY, lineIndex, color, seedRandom, spacingIntensity } = options;
+        let svgContent = '';
+        
+        const radius = 150 + (lineIndex * 60);
+        const angleStep = (Math.PI * 2) / Math.max(words.length, 1);
+        
+        words.forEach((word, wordIndex) => {
+            const angle = wordIndex * angleStep + (lineIndex * Math.PI / 4);
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+            
+            // Perspective distortion effect
+            const perspectiveScale = 1 + (Math.sin(angle) * 0.3); // Simulate depth
+            const skewX = Math.cos(angle + Math.PI/2) * 10; // Skew based on position
+            
+            // Size variation based on position and semantic importance
+            const baseSize = 18 + (spacingIntensity * 2);
+            const sizeVariation = 1 + (seedRandom() - 0.5) * 0.4;
+            const fontSize = baseSize * sizeVariation;
+            
+            // Character-level effects for geometric distortion
+            const chars = word.split('');
+            let charOffset = 0;
+            
+            chars.forEach((char, charIndex) => {
+                // Wave distortion along the word
+                const waveOffset = Math.sin(charIndex * 0.8) * 5;
+                const charY = y + waveOffset;
+                
+                // Progressive scaling within word
+                const charScale = perspectiveScale * (0.8 + (charIndex / chars.length) * 0.4);
+                
+                const rotation = (angle * 180 / Math.PI) + 90;
+                const charSvg = this.generateWordWithBaseFont(char, color, fontSize);
+                const transform = `translate(${x + charOffset}, ${charY}) rotate(${rotation}) scale(${charScale}) skewX(${skewX})`;
+                
+                svgContent += `<g transform="${transform}">${charSvg}</g>`;
+                
+                charOffset += fontSize * 0.6 * charScale;
+            });
+        });
+        
+        return svgContent;
+    }
+
+    generateSpiralComposition(lines, options) {
+        const { canvasWidth, canvasHeight, spacingIntensity, color, biometric } = options;
+        let svgContent = '';
+        
+        const centerX = canvasWidth / 2;
+        const centerY = canvasHeight / 2;
+        const allWords = lines.join(' ').split(/\s+/);
+        
+        allWords.forEach((word, index) => {
+            const angle = index * 0.5;
+            const radius = 20 + index * 8;
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+            const rotation = angle * 180 / Math.PI;
+            
+            const wordSvg = this.generateWordWithBaseFont(word, color, 20);
+            const transform = `translate(${x}, ${y}) rotate(${rotation})`;
+            
+            svgContent += `<g transform="${transform}">${wordSvg}</g>`;
+        });
+        
+        return svgContent;
+    }
+
+    generateConcreteComposition(lines, options) {
+        const { canvasWidth, canvasHeight, semanticSpacing, color, biometric } = options;
+        let svgContent = '';
+        
+        if (semanticSpacing) {
+            // Semantic-based concrete poem arrangement
+            return this.generateSemanticConcreteComposition(lines, options);
+        }
+        
+        // Simple concrete poem: arrange text in a shape (basic implementation)
+        const words = lines.join(' ').split(/\s+/);
+        const cols = Math.ceil(Math.sqrt(words.length));
+        const cellWidth = canvasWidth / cols;
+        const cellHeight = canvasHeight / cols;
+        
+        words.forEach((word, index) => {
+            const col = index % cols;
+            const row = Math.floor(index / cols);
+            const x = col * cellWidth + cellWidth / 2;
+            const y = row * cellHeight + cellHeight / 2;
+            
+            // Create shape-based spacing (simple diamond pattern)
+            const centerCol = cols / 2;
+            const centerRow = cols / 2;
+            const distanceFromCenter = Math.abs(col - centerCol) + Math.abs(row - centerRow);
+            
+            // Only show words within the diamond shape
+            if (distanceFromCenter <= cols / 2) {
+                const wordSvg = this.generateWordWithBaseFont(word, color, 18);
+                const transform = `translate(${x}, ${y})`;
+                svgContent += `<g transform="${transform}">${wordSvg}</g>`;
+            }
+        });
+        
+        return svgContent;
+    }
+
+    generateSemanticConcreteComposition(lines, options) {
+        const { canvasWidth, canvasHeight, color, biometric } = options;
+        let svgContent = '';
+        
+        // Use safe area within the canvas (excluding margins)
+        const safeMargin = 100;
+        const safeWidth = canvasWidth - (safeMargin * 2);
+        const safeHeight = canvasHeight - (safeMargin * 2);
+        
+        const centerX = safeWidth / 2;
+        const centerY = safeHeight / 2;
+        
+        lines.forEach((line, lineIndex) => {
+            const words = this.analyzeSemanticSpacing(line);
+            const lineAngle = (lineIndex * Math.PI * 2) / lines.length;
+            
+            let currentRadius = 100 + lineIndex * 60;
+            
+            words.forEach((wordData, wordIndex) => {
+                const { word, semanticWeight, pauseAfter, emphasis } = wordData;
+                
+                // Position based on semantic importance and pauses
+                const angle = lineAngle + (wordIndex * 0.3);
+                const x = centerX + Math.cos(angle) * currentRadius;
+                const y = centerY + Math.sin(angle) * currentRadius;
+                
+                // Size based on semantic weight and emphasis
+                const fontSize = 16 + (semanticWeight * 8) + (emphasis ? 6 : 0);
+                
+                // Generate the word
+                const wordSvg = this.generateWordWithBaseFont(word, color, fontSize);
+                const transform = `translate(${x}, ${y})`;
+                
+                svgContent += `<g transform="${transform}">${wordSvg}</g>`;
+                
+                // Adjust radius based on pauses (create visual gaps)
+                if (pauseAfter) {
+                    currentRadius += pauseAfter * 30; // Create gap
+                }
+            });
+        });
+        
+        return svgContent;
+    }
+
+    analyzeSemanticSpacing(text) {
+        const words = text.split(/\s+/);
+        const analyzed = [];
+        
+        // Semantic analysis keywords
+        const emphasisWords = ['love', 'death', 'life', 'soul', 'heart', 'dream', 'pain', 'joy', 'hope', 'fear'];
+        const pauseMarkers = ['.', ',', ';', ':', '!', '?', '--', '—'];
+        
+        words.forEach((word, index) => {
+            if (!word.trim()) return;
+            
+            // Clean word for analysis
+            const cleanWord = word.toLowerCase().replace(/[^a-z]/g, '');
+            const originalWord = word;
+            
+            // Determine semantic weight (0-1)
+            let semanticWeight = 0.3; // Base weight
+            
+            // Emphasis words get higher weight
+            if (emphasisWords.includes(cleanWord)) {
+                semanticWeight = 0.8;
+            }
+            
+            // Longer words get slightly more weight
+            if (cleanWord.length > 6) {
+                semanticWeight += 0.2;
+            }
+            
+            // Check for emphasis (capitals, exclamation)
+            const emphasis = originalWord === originalWord.toUpperCase() || originalWord.includes('!');
+            
+            // Check for pause after this word
+            let pauseAfter = 0;
+            pauseMarkers.forEach(marker => {
+                if (originalWord.includes(marker)) {
+                    switch (marker) {
+                        case '.':
+                        case '!':
+                        case '?':
+                            pauseAfter = 3; // Long pause
+                            break;
+                        case ',':
+                        case ';':
+                            pauseAfter = 2; // Medium pause
+                            break;
+                        case ':':
+                            pauseAfter = 1.5; // Short pause
+                            break;
+                        default:
+                            pauseAfter = 1; // Minimal pause
+                    }
+                }
+            });
+            
+            analyzed.push({
+                word: originalWord,
+                semanticWeight: Math.min(semanticWeight, 1),
+                pauseAfter,
+                emphasis
+            });
+        });
+        
+        return analyzed;
+    }
+
+    generateTemplateComposition(lines, templateType, options) {
+        const { canvasWidth, canvasHeight, color, biometric, spacingIntensity, scaleVariance } = options;
+        
+        switch (templateType) {
+            case 'falling-words':
+                return this.generateFallingWordsTemplate(lines, options);
+            case 'heart-shape':
+                return this.generateHeartShapeTemplate(lines, options);
+            case 'tree-growth':
+                return this.generateTreeGrowthTemplate(lines, options);
+            case 'wave-motion':
+                return this.generateWaveMotionTemplate(lines, options);
+            case 'explosion':
+                return this.generateExplosionTemplate(lines, options);
+            case 'river-flow':
+                return this.generateRiverFlowTemplate(lines, options);
+            default:
+                return this.generateFallingWordsTemplate(lines, options);
+        }
+    }
+
+    generateFallingWordsTemplate(lines, options) {
+        const { canvasWidth, canvasHeight, color, biometric } = options;
+        let svgContent = '';
+        
+        const words = lines.join(' ').split(/\s+/);
+        const seedRandom = this.createSeededRandom(words.join('').length);
+        
+        words.forEach((word, index) => {
+            // Create falling/cascading effect
+            const x = (canvasWidth * 0.1) + (seedRandom() * canvasWidth * 0.8);
+            const y = (canvasHeight * 0.1) + (index * (canvasHeight * 0.8) / words.length);
+            
+            // Add slight drift as words "fall"
+            const drift = biometric ? (seedRandom() - 0.5) * 100 : (seedRandom() - 0.5) * 50;
+            const finalX = x + drift;
+            
+            // Size decreases slightly as words fall
+            const fallProgress = index / words.length;
+            const fontSize = 28 - (fallProgress * 8);
+            
+            const wordSvg = this.generateWordWithBaseFont(word, color, fontSize);
+            const transform = `translate(${finalX}, ${y})`;
+            
+            svgContent += `<g transform="${transform}">${wordSvg}</g>`;
+        });
+        
+        return svgContent;
+    }
+
+    generateHeartShapeTemplate(lines, options) {
+        const { canvasWidth, canvasHeight, color, biometric } = options;
+        let svgContent = '';
+        
+        const words = lines.join(' ').split(/\s+/);
+        const centerX = canvasWidth / 2;
+        const centerY = canvasHeight / 2;
+        const seedRandom = this.createSeededRandom(words.join('').length);
+        
+        words.forEach((word, index) => {
+            // Heart shape parametric equations
+            const t = (index / words.length) * Math.PI * 2;
+            const scale = 60;
+            
+            // Heart shape: x = 16sin³(t), y = 13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)
+            const heartX = 16 * Math.pow(Math.sin(t), 3) * scale / 16;
+            const heartY = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * scale / 16;
+            
+            const x = centerX + heartX;
+            const y = centerY + heartY;
+            
+            // Size based on position within heart
+            const distanceFromCenter = Math.sqrt(heartX * heartX + heartY * heartY);
+            const fontSize = 16 + (distanceFromCenter / 20);
+            
+            const wordSvg = this.generateWordWithBaseFont(word, color, fontSize);
+            const transform = `translate(${x}, ${y})`;
+            
+            svgContent += `<g transform="${transform}">${wordSvg}</g>`;
+        });
+        
+        return svgContent;
+    }
+
+    generateTreeGrowthTemplate(lines, options) {
+        const { canvasWidth, canvasHeight, color, biometric } = options;
+        let svgContent = '';
+        
+        const words = lines.join(' ').split(/\s+/);
+        const centerX = canvasWidth / 2;
+        const groundY = canvasHeight * 0.8;
+        const seedRandom = this.createSeededRandom(words.join('').length);
+        
+        words.forEach((word, index) => {
+            // Tree structure: trunk, branches, leaves
+            const progress = index / words.length;
+            
+            if (progress < 0.3) {
+                // Trunk words
+                const y = groundY - (progress * canvasHeight * 0.4);
+                const x = centerX + (seedRandom() - 0.5) * 30;
+                const fontSize = 20;
+                
+                const wordSvg = this.generateWordWithBaseFont(word, color, fontSize);
+                const transform = `translate(${x}, ${y})`;
+                svgContent += `<g transform="${transform}">${wordSvg}</g>`;
+                
+            } else if (progress < 0.7) {
+                // Branch words
+                const branchProgress = (progress - 0.3) / 0.4;
+                const branchAngle = (seedRandom() - 0.5) * Math.PI / 2;
+                const branchLength = 80 + branchProgress * 60;
+                
+                const x = centerX + Math.cos(branchAngle) * branchLength;
+                const y = groundY - canvasHeight * 0.3 - branchProgress * canvasHeight * 0.2;
+                const fontSize = 18;
+                
+                const wordSvg = this.generateWordWithBaseFont(word, color, fontSize);
+                const transform = `translate(${x}, ${y})`;
+                svgContent += `<g transform="${transform}">${wordSvg}</g>`;
+                
+            } else {
+                // Leaf words
+                const leafProgress = (progress - 0.7) / 0.3;
+                const leafAngle = seedRandom() * Math.PI * 2;
+                const leafRadius = 40 + leafProgress * 80;
+                
+                const x = centerX + Math.cos(leafAngle) * leafRadius;
+                const y = canvasHeight * 0.3 + Math.sin(leafAngle) * leafRadius * 0.5;
+                const fontSize = 14 + leafProgress * 6;
+                
+                const wordSvg = this.generateWordWithBaseFont(word, color, fontSize);
+                const transform = `translate(${x}, ${y})`;
+                svgContent += `<g transform="${transform}">${wordSvg}</g>`;
+            }
+        });
+        
+        return svgContent;
+    }
+
+    generateWaveMotionTemplate(lines, options) {
+        const { canvasWidth, canvasHeight, color, biometric } = options;
+        let svgContent = '';
+        
+        const words = lines.join(' ').split(/\s+/);
+        const seedRandom = this.createSeededRandom(words.join('').length);
+        
+        words.forEach((word, index) => {
+            // Create wave motion across canvas
+            const progress = index / words.length;
+            const x = canvasWidth * 0.1 + (progress * canvasWidth * 0.8);
+            
+            // Multiple wave frequencies for complex motion
+            const wave1 = Math.sin(progress * Math.PI * 4) * 80;
+            const wave2 = Math.sin(progress * Math.PI * 8) * 30;
+            const wave3 = Math.sin(progress * Math.PI * 12) * 15;
+            
+            const y = (canvasHeight / 2) + wave1 + wave2 + wave3;
+            
+            // Size oscillates with wave motion
+            const sizeWave = Math.sin(progress * Math.PI * 6);
+            const fontSize = 18 + (sizeWave * 8);
+            
+            // Rotation follows wave direction
+            const rotation = Math.atan2(wave1 + wave2, canvasWidth / words.length) * 180 / Math.PI;
+            
+            const wordSvg = this.generateWordWithBaseFont(word, color, fontSize);
+            const transform = `translate(${x}, ${y}) rotate(${rotation})`;
+            
+            svgContent += `<g transform="${transform}">${wordSvg}</g>`;
+        });
+        
+        return svgContent;
+    }
+
+    generateExplosionTemplate(lines, options) {
+        const { canvasWidth, canvasHeight, color, biometric } = options;
+        let svgContent = '';
+        
+        const words = lines.join(' ').split(/\s+/);
+        const centerX = canvasWidth / 2;
+        const centerY = canvasHeight / 2;
+        const seedRandom = this.createSeededRandom(words.join('').length);
+        
+        words.forEach((word, index) => {
+            // Explosion/burst from center
+            const angle = (index / words.length) * Math.PI * 2 + (seedRandom() - 0.5) * 0.5;
+            const explosionRadius = (index / words.length) * Math.min(canvasWidth, canvasHeight) * 0.4;
+            
+            const x = centerX + Math.cos(angle) * explosionRadius;
+            const y = centerY + Math.sin(angle) * explosionRadius;
+            
+            // Size decreases with distance from center
+            const distanceFactor = 1 - (explosionRadius / (Math.min(canvasWidth, canvasHeight) * 0.4));
+            const fontSize = 12 + (distanceFactor * 16);
+            
+            // Rotation radiates outward
+            const rotation = angle * 180 / Math.PI;
+            
+            const wordSvg = this.generateWordWithBaseFont(word, color, fontSize);
+            const transform = `translate(${x}, ${y}) rotate(${rotation})`;
+            
+            svgContent += `<g transform="${transform}">${wordSvg}</g>`;
+        });
+        
+        return svgContent;
+    }
+
+    generateRiverFlowTemplate(lines, options) {
+        const { canvasWidth, canvasHeight, color, biometric } = options;
+        let svgContent = '';
+        
+        const words = lines.join(' ').split(/\s+/);
+        const seedRandom = this.createSeededRandom(words.join('').length);
+        
+        words.forEach((word, index) => {
+            // River-like flowing path
+            const progress = index / words.length;
+            
+            // S-curve path like a meandering river
+            const baseX = canvasWidth * 0.1 + (progress * canvasWidth * 0.8);
+            const meander = Math.sin(progress * Math.PI * 3) * (canvasWidth * 0.15);
+            const x = baseX + meander;
+            
+            // Slight vertical flow
+            const flowY = Math.sin(progress * Math.PI * 2) * 20;
+            const y = (canvasHeight / 2) + flowY;
+            
+            // Add randomness for natural flow
+            const naturalX = x + (seedRandom() - 0.5) * 40;
+            const naturalY = y + (seedRandom() - 0.5) * 30;
+            
+            // Size varies along the flow
+            const flowIntensity = Math.abs(Math.sin(progress * Math.PI * 4));
+            const fontSize = 16 + (flowIntensity * 12);
+            
+            // Rotation follows flow direction
+            const flowDirection = Math.cos(progress * Math.PI * 3) * Math.PI / 8;
+            const rotation = flowDirection * 180 / Math.PI;
+            
+            const wordSvg = this.generateWordWithBaseFont(word, color, fontSize);
+            const transform = `translate(${naturalX}, ${naturalY}) rotate(${rotation})`;
+            
+            svgContent += `<g transform="${transform}">${wordSvg}</g>`;
+        });
+        
+        return svgContent;
+    }
+
     generateFont() {
         const text = this.textInput.value.trim() || 'hello';
         const fontType = this.fontSelect.value;
@@ -1540,6 +2659,9 @@ class BiometricFontGenerator {
                 break;
             case 'vitkovac-v':
                 this.generateVitkovacV(text);
+                break;
+            case 'visual-poetry':
+                this.generateVisualPoetry(text);
                 break;
             default:
                 this.generateKvarH(text, 'brut');
@@ -1686,6 +2808,11 @@ class BiometricFontGenerator {
                         patternText = `${currentForm} ${currentWeight} | Vertical columns | Enter = new column`;
                     }
                     break;
+                case 'visual-poetry':
+                    const mode = patterns.mode || 'scattered';
+                    const lineCount = patterns.lines || 1;
+                    patternText = `VISUAL POETRY | Mode: ${mode.toUpperCase()} | Lines: ${lineCount} | Spatial composition using biometric typography`;
+                    break;
             }
             patternDiv.textContent = patternText;
             
@@ -1697,7 +2824,9 @@ class BiometricFontGenerator {
 
     copySvg() {
         const isTransparent = this.transparentBgToggle.checked;
-        const svgElement = this.outputSvg.cloneNode(true);
+        const selectedFont = this.fontSelect.value;
+        const isPoetry = selectedFont === 'visual-poetry';
+        const svgElement = isPoetry ? this.poetrySvg.cloneNode(true) : this.outputSvg.cloneNode(true);
         
         // Add background if not transparent
         if (!isTransparent) {
@@ -1721,7 +2850,11 @@ class BiometricFontGenerator {
 
     updateSvgBackground() {
         const isTransparent = this.transparentBgToggle.checked;
-        const svgElement = this.outputSvg;
+        const selectedFont = this.fontSelect.value;
+        const isPoetry = selectedFont === 'visual-poetry';
+        const svgElement = isPoetry ? this.poetrySvg : this.outputSvg;
+        
+        if (!svgElement) return;
         
         if (isTransparent) {
             // Remove any existing background
@@ -1738,7 +2871,9 @@ class BiometricFontGenerator {
 
     downloadSvg() {
         const isTransparent = this.transparentBgToggle.checked;
-        const svgElement = this.outputSvg.cloneNode(true);
+        const selectedFont = this.fontSelect.value;
+        const isPoetry = selectedFont === 'visual-poetry';
+        const svgElement = isPoetry ? this.poetrySvg.cloneNode(true) : this.outputSvg.cloneNode(true);
         
         // Add background if not transparent
         if (!isTransparent) {
@@ -1758,7 +2893,8 @@ class BiometricFontGenerator {
         const a = document.createElement('a');
         a.href = url;
         const bgSuffix = isTransparent ? '-transparent' : '';
-        a.download = `atypography-${this.fontSelect.value}${bgSuffix}-${Date.now()}.svg`;
+        const fontName = isPoetry ? `visual-poetry-${this.poetryModeSelect.value}` : this.fontSelect.value;
+        a.download = `atypography-${fontName}${bgSuffix}-${Date.now()}.svg`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -1770,11 +2906,13 @@ class BiometricFontGenerator {
     downloadPng() {
         const isTransparent = this.transparentBgToggle.checked;
         const exportScale = parseInt(this.exportSize.value);
-        const svgElement = this.outputSvg.cloneNode(true);
+        const selectedFont = this.fontSelect.value;
+        const isPoetry = selectedFont === 'visual-poetry';
+        const svgElement = isPoetry ? this.poetrySvg.cloneNode(true) : this.outputSvg.cloneNode(true);
         
         // Get original SVG dimensions
         const viewBox = svgElement.getAttribute('viewBox');
-        const [, , originalWidth, originalHeight] = viewBox ? viewBox.split(' ').map(Number) : [0, 0, 800, 200];
+        const [, , originalWidth, originalHeight] = viewBox ? viewBox.split(' ').map(Number) : isPoetry ? [0, 0, 1200, 800] : [0, 0, 800, 200];
         
         // Scale the SVG content by modifying the viewBox to show the same content at a larger size
         const scaledWidth = originalWidth * exportScale;
@@ -1824,7 +2962,8 @@ class BiometricFontGenerator {
                 a.href = url;
                 const bgSuffix = isTransparent ? '-transparent' : '';
                 const scaleSuffix = exportScale > 1 ? `-${exportScale}x` : '';
-                a.download = `atypography-${this.fontSelect.value}${bgSuffix}${scaleSuffix}-${Date.now()}.png`;
+                const fontName = isPoetry ? `visual-poetry-${this.poetryModeSelect.value}` : this.fontSelect.value;
+                a.download = `atypography-${fontName}${bgSuffix}${scaleSuffix}-${Date.now()}.png`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);

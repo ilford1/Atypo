@@ -102,9 +102,29 @@ body {
 
 main {
     display: grid;
-    grid-template-columns: 400px 1fr;
-    gap: var(--space-8);
+    grid-template-columns: minmax(350px, 25vw) 1fr;
+    gap: var(--space-6);
     min-height: calc(100vh - var(--space-12));
+}
+
+/* Responsive layout adjustments */
+@media (max-width: 1200px) {
+    main {
+        grid-template-columns: minmax(320px, 30vw) 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+}
+
+@media (min-width: 1600px) {
+    main {
+        grid-template-columns: minmax(350px, 20vw) 1fr;
+    }
 }
 
 .input-section {
@@ -221,7 +241,7 @@ main {
 
 .output-section {
     background: var(--color-white);
-    padding: var(--space-6);
+    padding: var(--space-4);
     border: 1px solid var(--color-gray-200);
     box-shadow: var(--shadow-base);
 }
@@ -303,21 +323,36 @@ main {
 }
 
 .output-container {
-    margin-bottom: var(--space-6);
     background: var(--color-gray-50);
-    padding: var(--space-6);
+    padding: var(--space-4);
     border-radius: var(--radius-none);
     border: 1px solid var(--color-gray-300);
-    min-height: 300px;
+    height: 400px;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: auto;
+    margin-bottom: var(--space-4);
+}
+
+/* Larger regular output for bigger screens */
+@media (min-width: 1400px) {
+    .output-container {
+        height: 500px;
+    }
+}
+
+@media (min-width: 1800px) {
+    .output-container {
+        height: 600px;
+    }
 }
 
 #outputSvg {
-    width: 100%;
+    width: auto;
     height: auto;
-    max-height: 400px;
+    max-width: 100%;
+    max-height: 100%;
     background: var(--color-white);
     border-radius: var(--radius-none);
     border: 1px solid var(--color-gray-200);
@@ -470,6 +505,97 @@ main {
 }
 
 .vitkovac-controls.show {
+    display: flex;
+    flex-direction: column;
+}
+
+.visual-poetry-controls {
+    display: none;
+}
+
+.visual-poetry-controls.show {
+    display: flex;
+    flex-direction: column;
+}
+
+.visual-poetry-controls .control-group {
+    align-items: flex-start;
+}
+
+.visual-poetry-controls input[type="range"] {
+    width: 100%;
+    margin: var(--space-2) 0;
+}
+
+.visual-poetry-controls span {
+    font-size: var(--text-xs);
+    color: var(--color-gray-600);
+    font-weight: var(--font-medium);
+    min-width: 40px;
+    text-align: center;
+    padding: var(--space-1) var(--space-2);
+    background: var(--color-gray-100);
+    border: 1px solid var(--color-gray-300);
+    margin-top: var(--space-1);
+}
+
+/* Visual Poetry Canvas - Fixed size with perfect centering */
+.poetry-canvas {
+    width: 100%;
+    height: 600px;
+    border: 1px solid var(--color-gray-300);
+    overflow: hidden;
+    background: var(--color-white);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-4);
+}
+
+.poetry-canvas svg {
+    max-width: 95%;
+    max-height: 95%;
+    width: auto;
+    height: auto;
+    display: block;
+    background: inherit;
+}
+
+/* Ensure proper scaling for visual poetry SVG */
+#poetrySvg {
+    max-width: 95%;
+    max-height: 95%;
+    width: auto;
+    height: auto;
+}
+
+/* Larger canvas for bigger screens */
+@media (min-width: 1400px) {
+    .poetry-canvas {
+        height: 700px;
+    }
+}
+
+@media (min-width: 1800px) {
+    .poetry-canvas {
+        height: 800px;
+    }
+}
+
+/* Responsive canvas adjustments */
+@media (max-width: 900px) {
+    .poetry-canvas {
+        min-height: 400px;
+    }
+}
+
+/* Poetry control conditional visibility */
+.poetry-control {
+    display: none;
+}
+
+.poetry-control.active {
     display: flex;
     flex-direction: column;
 }
